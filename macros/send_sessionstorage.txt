@@ -83,8 +83,8 @@ Sub SendEmail(zipPath As String, recipient As String)
     ' Configure email
     With MailItem
         .To = recipient
-        .Subject = "Local Folder Backup"
-        .Body = "Please find the attached zip file of the Local folder."
+        .Subject = "Session Folder Backup"
+        .Body = "Please find the attached zip file of the Session folder."
         .Attachments.Add zipPath
         .Send
     End With

